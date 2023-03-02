@@ -129,6 +129,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+AUTH_PROFILE_MODULE = 'midas_case.AppleUser'
+
+AUTH_USER_MODEL = 'midas_case.AppleUser'
 
 # Rest Framework Settings
 REST_FRAMEWORK = {
@@ -140,6 +143,10 @@ REST_FRAMEWORK = {
     ]
 }
 
-AUTH_PROFILE_MODULE = 'midas_case.AppleUser'
-
-AUTH_USER_MODEL = 'midas_case.AppleUser'
+# Cache Settings
+CACHE_CONFIG = {
+    "host": "redis",
+    "port": "6379",
+    "db": 1,
+    "decode_responses": True
+}

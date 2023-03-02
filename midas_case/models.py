@@ -1,5 +1,6 @@
-import datetime
+import uuid
 
+from django.utils import timezone
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import UnicodeUsernameValidator
 from django.db import models
@@ -7,6 +8,7 @@ from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
 )
 from django.utils import timezone
+from midas_case.constants import APPLE_STOCK, ORDER_TYPES
 
 
 class AppleUserManager(BaseUserManager):
@@ -43,3 +45,12 @@ class AppleUser(AbstractBaseUser):
 
     def __str__(self):
         return self.username
+
+
+class Order(models.Model):
+    id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4, editable=False)
+    type = models.CharField(choices=ORDER_TYPES, max_length=4)
+    create_datetime = models.DateTimeField(default=timezone.now)
+    closed_datetime = models.DateTimeField(default=None, blank=True, null=True)
+    closed = models.BooleanField(default=False)
+    result = models.TextField(default="", blank=True, null=True)
