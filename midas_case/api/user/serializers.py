@@ -21,3 +21,9 @@ class RegistrationSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+class AppleUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AppleUser
+        fields = ['username', 'number_of_apples']

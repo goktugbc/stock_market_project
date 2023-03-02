@@ -1,9 +1,10 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import AnonymousUser
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from midas_case.rest_framework_settings import CsrfExemptSessionAuthentication
-from .serializers import RegistrationSerializer
+from .serializers import RegistrationSerializer, AppleUserSerializer
 
 
 class Register(APIView):
@@ -34,3 +35,13 @@ class Logout(APIView):
     def post(self, request):
         logout(request)
         return Response({'msg': 'Successfully Logged out'}, status=status.HTTP_200_OK)
+
+
+class RetrieveUser(APIView):
+    authentication_classes = (CsrfExemptSessionAuthentication,)
+    def get(self, request):
+        if isinstance(request.user, AnonymousUser):
+            return Response({'msg': 'Please login.'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            serializer = AppleUserSerializer(request.user)
+            return Response(serializer.data)
