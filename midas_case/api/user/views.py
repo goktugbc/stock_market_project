@@ -8,6 +8,8 @@ from .serializers import RegistrationSerializer, AppleUserSerializer
 
 
 class Register(APIView):
+    serializer_class = RegistrationSerializer
+
     def post(self, request):
         serializer = RegistrationSerializer(data=request.data)
         if serializer.is_valid():
@@ -18,6 +20,7 @@ class Register(APIView):
 
 class Login(APIView):
     authentication_classes = (CsrfExemptSessionAuthentication,)
+
     def post(self, request):
         if 'username' not in request.data or 'password' not in request.data:
             return Response({'msg': 'Credentials missing'}, status=status.HTTP_400_BAD_REQUEST)

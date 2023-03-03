@@ -16,9 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from midas_case.api.user.urls import urlpatterns as user_urls
+from midas_case.api.order.urls import urlpatterns as order_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 ]
 
-urlpatterns += user_urls
+urlpatterns += user_urls + order_urls
