@@ -11,7 +11,8 @@ class EventStreamer:
         self.topic = topic
 
     def create_producer(self):
-        self.producer = KafkaProducer(bootstrap_servers='kafka:9092')
+        self.producer = KafkaProducer(bootstrap_servers='kafka:9092',
+                                      value_serializer=lambda x: json.dumps(x).encode('utf-8'))
 
     def create_consumer(self):
         self.consumer = KafkaConsumer(self.topic,
@@ -24,7 +25,7 @@ class EventStreamer:
 
     def process_messages(self, callback):
         for message in self.consumer:
-            message = message.value
+            message = json.loads(message.value)
             result = callback(message)
             if result:
                 self.consumer.commit()

@@ -1,6 +1,6 @@
 def calculate_remaining_apples():
     from django.db.models import Sum
-    from models import AppleUser
+    from midas_case.models import AppleUser
     from constants import APPLE_STOCK
 
     remaining_apples = APPLE_STOCK - AppleUser.objects.aggregate(Sum('number_of_apples'))

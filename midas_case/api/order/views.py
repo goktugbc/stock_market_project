@@ -16,9 +16,13 @@ class Buy(APIView):
     serializer_class = BuyOrderCreateSerializer
 
     def post(self, request):
+        from midas_case.celery import buy, sell
+        request.data['user'] = request.user.pk
         serializer = BuyOrderCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            buy.apply_async(args=[], serializer="json")
+            sell.apply_async(args=[], serializer="json")
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -28,9 +32,12 @@ class Sell(APIView):
     serializer_class = SellOrderCreateSerializer
 
     def post(self, request):
+        from midas_case.celery import buy, sell
         serializer = SellOrderCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            buy.apply_async(args=[], serializer="json")
+            sell.apply_async(args=[], serializer="json")
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -40,11 +47,15 @@ class Cancel(APIView):
     serializer_class = CancelOrderSerializer
 
     def delete(self, request):
+        from midas_case.celery import buy, sell, cancel
         try:
             order = Order.objects.get(id=request.data["id"])
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
         event_streamer = EventStreamer("cancel")
         event_streamer.create_producer()
-        event_streamer.send_message(json.dumps({"id": order.id}))
+        event_streamer.send_message({"id": str(order.id)})
+        buy.apply_async(args=[], serializer="json")
+        sell.apply_async(args=[], serializer="json")
+        cancel.apply_async(args=[], serializer="json")
         return Response(status=status.HTTP_202_ACCEPTED)

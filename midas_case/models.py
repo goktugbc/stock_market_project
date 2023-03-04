@@ -1,14 +1,18 @@
 import uuid
+import json
 
 from django.utils import timezone
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import UnicodeUsernameValidator
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
 )
 from django.utils import timezone
-from midas_case.constants import APPLE_STOCK, ORDER_TYPES, BUY_ORDER, SELL_ORDER
+from midas_case.constants import ORDER_TYPES, BUY_ORDER, SELL_ORDER
+from midas_case.event_streamer import EventStreamer
 
 
 class AppleUserManager(BaseUserManager):
@@ -104,3 +108,13 @@ class Order(models.Model):
             self.user.number_of_apples -= 1
             self.user.save()
             self.increment_actual_number_of_apples()
+
+
+# Signals
+@receiver(post_save, sender=Order)
+def produce_order_event(sender, instance, **kwargs):
+    if kwargs['created']:
+        for i in range(instance.planned_number_of_apples):
+            event_streamer = EventStreamer(instance.type)
+            event_streamer.create_producer()
+            event_streamer.send_message({"id": str(instance.id)})

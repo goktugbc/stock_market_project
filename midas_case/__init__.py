@@ -1,1 +1,1 @@
-from midas_case import celery
+#from midas_case import celery
