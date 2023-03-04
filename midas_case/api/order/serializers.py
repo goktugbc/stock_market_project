@@ -18,12 +18,13 @@ class BuyOrderCreateSerializer(serializers.ModelSerializer):
 
 
 class SellOrderCreateSerializer(serializers.ModelSerializer):
+    user = serializers.IntegerField()
     class Meta:
         model = Order
-        fields = ['planned_number_of_apples']
+        fields = ['user', 'planned_number_of_apples']
 
     def save(self):
-        order = Order(user=CurrentUserDefault(), type=SELL_ORDER,
+        order = Order(user_id=self.validated_data['user'], type=SELL_ORDER,
                       planned_number_of_apples=self.validated_data['planned_number_of_apples'])
         order.save()
         return order

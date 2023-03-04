@@ -29,6 +29,7 @@ class Sell(APIView):
     serializer_class = SellOrderCreateSerializer
 
     def post(self, request):
+        request.data['user'] = request.user.pk
         serializer = SellOrderCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
