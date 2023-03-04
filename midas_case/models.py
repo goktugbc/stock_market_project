@@ -113,8 +113,11 @@ class Order(models.Model):
 # Signals
 @receiver(post_save, sender=Order)
 def produce_order_event(sender, instance, **kwargs):
+    from midas_case.celery import buy, sell
     if kwargs['created']:
+        event_streamer = EventStreamer(instance.type)
+        event_streamer.create_producer()
         for i in range(instance.planned_number_of_apples):
-            event_streamer = EventStreamer(instance.type)
-            event_streamer.create_producer()
             event_streamer.send_message({"id": str(instance.id)})
+        buy.apply_async(args=[], serializer="json")
+        sell.apply_async(args=[], serializer="json")

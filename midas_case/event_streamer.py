@@ -18,14 +18,15 @@ class EventStreamer:
         self.consumer = KafkaConsumer(self.topic,
                                       bootstrap_servers='kafka:9092',
                                       auto_offset_reset='earliest',
-                                      value_deserializer=lambda x: json.loads(x.decode('utf-8')))
+                                      value_deserializer=lambda x: json.loads(x.decode('utf-8')),
+                                      group_id="goktug")
 
     def send_message(self, message):
         self.producer.send(self.topic, message)
 
     def process_messages(self, callback):
         for message in self.consumer:
-            message = json.loads(message.value)
+            message = message.value
             result = callback(message)
             if result:
                 self.consumer.commit()

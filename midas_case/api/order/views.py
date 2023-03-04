@@ -16,13 +16,10 @@ class Buy(APIView):
     serializer_class = BuyOrderCreateSerializer
 
     def post(self, request):
-        from midas_case.celery import buy, sell
         request.data['user'] = request.user.pk
         serializer = BuyOrderCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            buy.apply_async(args=[], serializer="json")
-            sell.apply_async(args=[], serializer="json")
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -32,12 +29,9 @@ class Sell(APIView):
     serializer_class = SellOrderCreateSerializer
 
     def post(self, request):
-        from midas_case.celery import buy, sell
         serializer = SellOrderCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            buy.apply_async(args=[], serializer="json")
-            sell.apply_async(args=[], serializer="json")
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
