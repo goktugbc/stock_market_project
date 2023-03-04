@@ -1,13 +1,11 @@
 import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'midas_case.settings')
-
 from celery import Celery
 from midas_case import settings
-from event_streamer import EventStreamer
+from midas_case.event_streamer import EventStreamer
 
 
 app = Celery('midas_case')
-
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'midas_case.settings')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
