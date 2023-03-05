@@ -13,6 +13,7 @@ from django.contrib.auth.models import (
 from django.utils import timezone
 from midas_case.constants import ORDER_TYPES, BUY_ORDER, SELL_ORDER
 from midas_case.event_streamer import EventStreamer
+from midas_case.utils import get_remaining_apples
 
 
 class AppleUserManager(BaseUserManager):
@@ -82,15 +83,22 @@ class Order(models.Model):
         self.closed = True
         self.closed_datetime = timezone.now()
         if self.actual_number_of_apples == 0:
-            self.result = "Cancelled."
+            result = "Cancelled."
+            self.set_result(result)
         elif self.actual_number_of_apples > 0:
-            self.result = "Partially processed and cancelled."
+            result = "Partially processed and cancelled."
+            self.set_result(result)
         self.save()
 
     def set_closed(self, result=None):
         self.closed = True
         self.closed_datetime = timezone.now()
-        self.result = result if result else "Completely processed and closed."
+        result = result if result else "Completely processed and closed."
+        self.set_result(result)
+        self.save()
+
+    def set_result(self, result):
+        self.result = result
         self.save()
 
     def increment_actual_number_of_apples(self):
@@ -98,6 +106,9 @@ class Order(models.Model):
         self.save()
         if self.actual_number_of_apples == self.planned_number_of_apples:
             self.set_closed(True)
+        else:
+            result = "Partially processed."
+            self.set_result(result)
 
     def process_order(self):
         if self.type == BUY_ORDER:
@@ -119,5 +130,6 @@ def produce_order_event(sender, instance, **kwargs):
         event_streamer.create_producer()
         for i in range(instance.planned_number_of_apples):
             event_streamer.send_message({"id": str(instance.id)})
-        buy.apply_async(args=[], serializer="json")
+        if instance.type != BUY_ORDER or (instance.type == BUY_ORDER and get_remaining_apples() > 0):
+            buy.apply_async(args=[], serializer="json")
         sell.apply_async(args=[], serializer="json")

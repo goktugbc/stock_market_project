@@ -12,7 +12,7 @@ services:
 
   celery_worker:
     build: .
-    command: celery -A midas_case worker -Q celery -l INFO
+    command: celery -A midas_case worker -Q celery --concurrency=1 -l INFO
     environment:
       - CELERY_BROKER=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0

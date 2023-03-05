@@ -3,8 +3,9 @@ from django.contrib.auth.models import AnonymousUser
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
 from midas_case.rest_framework_settings import CsrfExemptSessionAuthentication
-from .serializers import RegistrationSerializer, AppleUserSerializer
+from .serializers import LoginSerializer, RegistrationSerializer, AppleUserSerializer
 
 
 class Register(APIView):
@@ -21,6 +22,7 @@ class Register(APIView):
 class Login(APIView):
     authentication_classes = (CsrfExemptSessionAuthentication,)
 
+    @swagger_auto_schema(request_body=LoginSerializer)
     def post(self, request):
         if 'username' not in request.data or 'password' not in request.data:
             return Response({'msg': 'Credentials missing'}, status=status.HTTP_400_BAD_REQUEST)
@@ -35,13 +37,15 @@ class Login(APIView):
 
 class Logout(APIView):
     authentication_classes = (CsrfExemptSessionAuthentication,)
-    def post(self, request):
+
+    def get(self, request):
         logout(request)
         return Response({'msg': 'Successfully Logged out'}, status=status.HTTP_200_OK)
 
 
 class RetrieveUser(APIView):
     authentication_classes = (CsrfExemptSessionAuthentication,)
+
     def get(self, request):
         if isinstance(request.user, AnonymousUser):
             return Response({'msg': 'Please login.'}, status=status.HTTP_401_UNAUTHORIZED)

@@ -24,8 +24,7 @@ def get_remaining_apples():
 
     redis_client = redis.StrictRedis(**CACHE_CONFIG)
     cache = redis_client.get("remaining_apples")
-
     if cache is not None:
         return int(cache)
 
-    return set_remaining_apples(calculate_remaining_apples())
+    return int(set_remaining_apples(calculate_remaining_apples()))

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'midas_case',
     'django_celery_beat',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [

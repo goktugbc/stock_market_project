@@ -15,11 +15,27 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 from midas_case.api.user.urls import urlpatterns as user_urls
 from midas_case.api.order.urls import urlpatterns as order_urls
 
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="API Doc",
+        default_version='v1',
+        description="Midas Case Brokarage API Doc",
+    ),
+    public=True,
+)
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', schema_view.with_ui('swagger', cache_timeout=0),
+         name='schema-swagger-ui'),
 ]
 
 urlpatterns += user_urls + order_urls

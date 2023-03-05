@@ -2,6 +2,15 @@ from rest_framework import serializers
 from midas_case.models import AppleUser
 
 
+class LoginSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(write_only=True)
+    password = serializers.CharField(style={"input_type": "password"}, write_only=True)
+
+    class Meta:
+        model = AppleUser
+        fields = ['username', 'password']
+
+
 class RegistrationSerializer(serializers.ModelSerializer):
     password_conf = serializers.CharField(style={"input_type": "password"}, write_only=True)
 
