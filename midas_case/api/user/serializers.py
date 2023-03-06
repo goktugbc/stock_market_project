@@ -22,13 +22,11 @@ class RegistrationSerializer(serializers.ModelSerializer):
         }
 
     def save(self):
-        user = AppleUser(username=self.validated_data['username'])
         password = self.validated_data['password']
         password_conf = self.validated_data['password_conf']
         if password != password_conf:
             raise serializers.ValidationError({'password': 'Passwords must match.'})
-        user.set_password(password)
-        user.save()
+        user = AppleUser.objects.create_user(self.validated_data['username'], self.validated_data['password'])
         return user
 
 class AppleUserSerializer(serializers.ModelSerializer):

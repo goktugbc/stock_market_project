@@ -1,5 +1,5 @@
 import json
-from kafka import KafkaProducer, KafkaConsumer, TopicPartition, OffsetAndMetadata
+from kafka import KafkaProducer, KafkaConsumer
 
 
 class EventStreamer:

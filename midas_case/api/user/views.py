@@ -9,6 +9,7 @@ from .serializers import LoginSerializer, RegistrationSerializer, AppleUserSeria
 
 
 class Register(APIView):
+    authentication_classes = (CsrfExemptSessionAuthentication,)
     serializer_class = RegistrationSerializer
 
     def post(self, request):

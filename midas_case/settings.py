@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'midas_case',
     'django_celery_beat',
     'drf_yasg',
+    'django_nose',
 ]
 
 MIDDLEWARE = [
@@ -163,3 +164,13 @@ CELERY_RESULT_SERIALIZER = 'json'
 
 CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+
+# Test Coverage Calc Conf
+# Use nose to run all tests
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+# Tell nose to measure coverage on the 'foo' and 'bar' apps
+NOSE_ARGS = [
+    '--with-coverage',
+    '--cover-package=midas_case',
+]

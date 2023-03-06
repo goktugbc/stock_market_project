@@ -11,6 +11,7 @@ from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
 )
 from django.utils import timezone
+from datetime import timedelta
 from midas_case.constants import ORDER_TYPES, BUY_ORDER, SELL_ORDER
 from midas_case.event_streamer import EventStreamer
 from midas_case.utils import get_remaining_apples
@@ -22,7 +23,7 @@ class AppleUserManager(BaseUserManager):
             raise ValueError('Users must have an username')
 
         user = self.model(
-            username=self.username,
+            username=username,
         )
 
         user.set_password(password)
@@ -105,7 +106,7 @@ class Order(models.Model):
         self.actual_number_of_apples += 1
         self.save()
         if self.actual_number_of_apples == self.planned_number_of_apples:
-            self.set_closed(True)
+            self.set_closed()
         else:
             result = "Partially processed."
             self.set_result(result)
@@ -131,5 +132,5 @@ def produce_order_event(sender, instance, **kwargs):
         for i in range(instance.planned_number_of_apples):
             event_streamer.send_message({"id": str(instance.id)})
         if instance.type != BUY_ORDER or (instance.type == BUY_ORDER and get_remaining_apples() > 0):
-            buy.apply_async(args=[], serializer="json")
-        sell.apply_async(args=[], serializer="json")
+            buy.apply_async(args=[], serializer="json", eta=timezone.now() + timedelta(seconds=10))
+        sell.apply_async(args=[], serializer="json", eta=timezone.now() + timedelta(seconds=10))

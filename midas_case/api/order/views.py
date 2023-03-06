@@ -1,7 +1,5 @@
-import json
-
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import AnonymousUser
+from django.utils import timezone
+from datetime import timedelta
 from rest_framework import status, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -54,8 +52,8 @@ class Cancel(APIView):
         event_streamer = EventStreamer("cancel")
         event_streamer.create_producer()
         event_streamer.send_message({"id": str(order.id)})
-        buy.apply_async(args=[], serializer="json")
-        cancel.apply_async(args=[], serializer="json")
+        buy.apply_async(args=[], serializer="json", eta=timezone.now() + timedelta(seconds=10))
+        cancel.apply_async(args=[], serializer="json", eta=timezone.now() + timedelta(seconds=10))
         return Response(status=status.HTTP_202_ACCEPTED)
 
 
@@ -64,8 +62,11 @@ class RetrieveOrder(APIView):
 
     def get(self, request, order_id):
         order = Order.objects.get(pk=order_id)
-        serializer = OrderSerializer(order)
-        return Response(serializer.data)
+        if order.user == request.user:
+            serializer = OrderSerializer(order)
+            return Response(serializer.data)
+        else:
+            return Response({'msg': 'Wrong user.'}, status=status.HTTP_403_FORBIDDEN)
 
 
 class RetrieveOrdersOfUser(generics.ListAPIView):
