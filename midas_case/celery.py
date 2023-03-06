@@ -34,7 +34,7 @@ def sell():
     event_streamer = EventStreamer("sell")
     event_streamer.create_consumer()
     event_streamer.process_messages(sell_process)
-    buy.apply_async(args=[], serializer="json", eta=timezone.now() + timedelta(seconds=10))
+    buy.apply_async(args=[], serializer="json", eta=timezone.now() + timedelta(seconds=5))
     return True
 
 

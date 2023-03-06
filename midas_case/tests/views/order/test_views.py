@@ -91,6 +91,36 @@ class OrderViewTests(TestCase):
 
         self.assertEqual(response.status_code, 202)
 
+    def test_forbidden_cancel_view(self):
+        request_body = {
+            "planned_number_of_apples": self.planned_number_of_apples,
+        }
+
+        response = self.client.post(
+            reverse('buy'),
+            json.dumps(request_body),
+            content_type='application/json'
+        )
+
+        self.assertEqual(response.status_code, 202)
+
+        request_body = {
+            "id": str(self.forbidden_order.id),
+        }
+
+        response = self.client.delete(
+            reverse('cancel'),
+            json.dumps(request_body),
+            content_type='application/json'
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+        json_string = response.content
+        response_data = json.loads(json_string)
+
+        self.assertEqual(response_data["msg"], "Wrong user.")
+
     def test_retrieve_order_view(self):
         request_body = {
             "planned_number_of_apples": self.planned_number_of_apples,

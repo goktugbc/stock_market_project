@@ -49,12 +49,15 @@ class Cancel(APIView):
             order = Order.objects.get(id=request.data["id"])
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        event_streamer = EventStreamer("cancel")
-        event_streamer.create_producer()
-        event_streamer.send_message({"id": str(order.id)})
-        buy.apply_async(args=[], serializer="json", eta=timezone.now() + timedelta(seconds=10))
-        cancel.apply_async(args=[], serializer="json", eta=timezone.now() + timedelta(seconds=10))
-        return Response(status=status.HTTP_202_ACCEPTED)
+        if order.user == request.user:
+            event_streamer = EventStreamer("cancel")
+            event_streamer.create_producer()
+            event_streamer.send_message({"id": str(order.id)})
+            buy.apply_async(args=[], serializer="json", eta=timezone.now() + timedelta(seconds=5))
+            cancel.apply_async(args=[], serializer="json", eta=timezone.now() + timedelta(seconds=5))
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response({'msg': 'Wrong user.'}, status=status.HTTP_403_FORBIDDEN)
 
 
 class RetrieveOrder(APIView):

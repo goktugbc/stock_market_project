@@ -30,15 +30,19 @@ class EventStreamer:
 
     def process_messages(self, callback, message_count_to_process=None):
         i = 0
+        unsuccessful_messages = []
         for message in self.consumer:
             message = message.value
             result = callback(message)
             if result:
                 self.consumer.commit()
             else:
-                self.consumer.close()
-                break
-            if message_count_to_process and message_count_to_process == i:
-                self.consumer.close()
-                break
+                unsuccessful_messages.append(message)
+            if message_count_to_process and message_count_to_process <= i:
+                unsuccessful_messages.append(message)
             i += 1
+
+        self.consumer.close()
+        self.create_producer()
+        for message in unsuccessful_messages:
+            self.send_message(message)

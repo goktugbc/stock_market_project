@@ -132,5 +132,5 @@ def produce_order_event(sender, instance, **kwargs):
         for i in range(instance.planned_number_of_apples):
             event_streamer.send_message({"id": str(instance.id)})
         if instance.type != BUY_ORDER or (instance.type == BUY_ORDER and get_remaining_apples() > 0):
-            buy.apply_async(args=[], serializer="json", eta=timezone.now() + timedelta(seconds=10))
-        sell.apply_async(args=[], serializer="json", eta=timezone.now() + timedelta(seconds=10))
+            buy.apply_async(args=[], serializer="json", eta=timezone.now() + timedelta(seconds=5))
+        sell.apply_async(args=[], serializer="json", eta=timezone.now() + timedelta(seconds=5))
